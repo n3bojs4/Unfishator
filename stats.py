@@ -1,10 +1,10 @@
-from operator import mod
+#from operator import mod
+import argparse
 import chess
 import chess.pgn
 import chess.engine
+import sys
 
-# Load Stockfish
-engine = chess.engine.SimpleEngine.popen_uci("stockfish")
 
 # init chessboard
 board = chess.Board()
@@ -15,14 +15,37 @@ WhiteMoves = 0
 BlackMoves = 0
 WhitePoints = 0
 BlackPoints = 0
-depth = 15
+
+parser = argparse.ArgumentParser(description='Analyze pgn file with stockfish.')
+parser.add_argument('--depth',default=12,type=int, help='Stockfish depth to use.')
+parser.add_argument('--log',default='analyze.log',type=str, help='Reporting file path.')
+parser.add_argument('--file',type=str, help='PGN file path to analyze.')
+parser.add_argument('--debug',action='store_true', help='active debug mode.')
+
+args = parser.parse_args()
 
 
-print("Analyzing game with stockfish depth=",depth)
+if not (args.log): parser.error("Please give a report file with --log.")
+if not (args.file): parser.error("Please give a pgn file with --file.")
 
+depth = args.depth
+log = args.log
+pgnfile = args.file
+debug = args.debug
 
-with open("test.pgn") as pgn:
-    first_game = chess.pgn.read_game(pgn)
+# Load Stockfish
+engine = chess.engine.SimpleEngine.popen_uci("stockfish")
+
+if debug:
+    print("Analyzing game with stockfish depth=",depth)
+
+try:
+    with open("test.pgn") as pgn:
+        first_game = chess.pgn.read_game(pgn)
+except:
+    print("Cannot open pgn file:",pgnfile)
+    sys.exit()
+
 
 
 for move in first_game.mainline_moves():
@@ -36,16 +59,18 @@ for move in first_game.mainline_moves():
     
     # Black is playing
     if counter%2==0:
-        print("Black played",move)
-        print("stockfish recommend:",BlackNextBestMove.move)
+        if debug:
+            print("Black played",move)
+            print("stockfish recommend:",BlackNextBestMove.move)
         if str(move) in str(BlackNextBestMove):
             BlackPoints = BlackPoints+1
         BlackMoves = BlackMoves+1
         WhiteNextBestMove = engine.play(board, chess.engine.Limit(depth=depth))
     # White is playing
     else:
-        print("White played",move)
-        print("stockfish recommend:",WhiteNextBestMove.move)
+        if debug:
+            print("White played",move)
+            print("stockfish recommend:",WhiteNextBestMove.move)
         if str(move) in str(WhiteNextBestMove):
             WhitePoints = WhitePoints+1
         WhiteMoves = WhiteMoves+1
