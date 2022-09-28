@@ -5,7 +5,20 @@ This little python script use stockfish to calculate best moves from a game.
 
 For the first release, the player won 1 point if it's the stockfish best move.
 
-At the end the average is calculated on the number of moves played by the player. Ex: 30 moves played with the 15 best stockfish moves = 15/30 = 50% accuracy
+At the end the average is calculated on the number of moves played by the player. Ex: 30 moves played with the 15 best stockfish moves = 15/30 = 50% accuracy.
+
+
+Installation
+------------
+
+
+```
+git clone https://github.com/n3bojs4/Unfishator
+cd Unfishator && python3 -m venv .
+source bin/activate && pip install -r requirements.txt
+```
+
+
 
 
 
