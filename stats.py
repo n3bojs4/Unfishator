@@ -18,18 +18,16 @@ BlackPoints = 0
 
 parser = argparse.ArgumentParser(description='Analyze pgn file with stockfish.')
 parser.add_argument('--depth',default=12,type=int, help='Stockfish depth to use.')
-parser.add_argument('--log',default='analyze.log',type=str, help='Reporting file path.')
+# to implement : arser.add_argument('--log',default='analyze.log',type=str, help='Reporting file path.')
 parser.add_argument('--file',type=str, help='PGN file path to analyze.')
 parser.add_argument('--debug',action='store_true', help='active debug mode.')
 
 args = parser.parse_args()
 
 
-if not (args.log): parser.error("Please give a report file with --log.")
 if not (args.file): parser.error("Please give a pgn file with --file.")
 
 depth = args.depth
-log = args.log
 pgnfile = args.file
 debug = args.debug
 
@@ -40,7 +38,7 @@ if debug:
     print("Analyzing game with stockfish depth=",depth)
 
 try:
-    with open("test.pgn") as pgn:
+    with open(pgnfile) as pgn:
         first_game = chess.pgn.read_game(pgn)
 except:
     print("Cannot open pgn file:",pgnfile)
@@ -88,8 +86,8 @@ print("Whitepoints=",WhitePoints)
 print("Blackpoints=",BlackPoints)
 print("Statistics of the game:")
 print("Stockfish depth: ",depth)
-print("White:",(WhitePoints/WhiteMoves)*100,"%")
-print("Black:",(BlackPoints/BlackMoves)*100,"%")
+print("White:",round((WhitePoints/WhiteMoves)*100,2),"%")
+print("Black:",round((BlackPoints/BlackMoves)*100,2),"%")
 
 engine.quit()
 
