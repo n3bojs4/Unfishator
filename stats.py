@@ -15,7 +15,7 @@ WhiteMoves = 0
 BlackMoves = 0
 WhitePoints = 0
 BlackPoints = 0
-depth = 20
+depth = 15
 
 
 print("Analyzing game with stockfish depth=",depth)
