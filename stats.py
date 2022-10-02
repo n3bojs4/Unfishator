@@ -9,12 +9,10 @@ import sys
 # init chessboard
 board = chess.Board()
 
-# init counter
-counter = 1
-WhiteMoves = 0
-BlackMoves = 0
-WhitePoints = 0
-BlackPoints = 0
+# init array for storing games
+ChessGames = []
+
+
 
 parser = argparse.ArgumentParser(description='Analyze pgn file with stockfish.')
 parser.add_argument('--depth',default=12,type=int, help='Stockfish depth to use.')
@@ -39,55 +37,72 @@ if debug:
 
 try:
     with open(pgnfile) as pgn:
-        first_game = chess.pgn.read_game(pgn)
+        while True:
+            game = chess.pgn.read_game(pgn)
+            ChessGames.append(game)
+            if game is None:
+                # We are at the end of the file and we delete the last list element which is None
+                del ChessGames[-1]
+                break
 except:
     print("Cannot open pgn file:",pgnfile)
     sys.exit()
 
+for games in ChessGames:
+
+    # Reset board
+    board.reset()
+
+    # init counter
+    counter = 1
+    WhiteMoves = 0
+    BlackMoves = 0
+    WhitePoints = 0
+    BlackPoints = 0
 
 
-for move in first_game.mainline_moves():
+    for move in games.mainline_moves():
+        # Set new position
+        board.push(move)
+
+
+        # if first move we assume it's the best move
+        if counter==1:
+            WhiteNextBestMove = engine.play(board, chess.engine.Limit(depth=depth))
     
-    # Set new position
-    board.push(move)
-
-    # if first move we assume it's the best move
-    if counter==1:
-        WhiteNextBestMove = engine.play(board, chess.engine.Limit(depth=depth))
+        # Black is playing
+        if counter%2==0:
+            if debug:
+                print("Black played",move)
+                print("stockfish recommend:",BlackNextBestMove.move)
+            if str(move) in str(BlackNextBestMove):
+                BlackPoints = BlackPoints+1
+            BlackMoves = BlackMoves+1
+            WhiteNextBestMove = engine.play(board, chess.engine.Limit(depth=depth))
+        # White is playing
+        else:
+            if debug:
+                print("White played",move)
+                print("stockfish recommend:",WhiteNextBestMove.move)
+            if str(move) in str(WhiteNextBestMove):
+                WhitePoints = WhitePoints+1
+            WhiteMoves = WhiteMoves+1
+            BlackNextBestMove = engine.play(board, chess.engine.Limit(depth=depth))
     
-    # Black is playing
-    if counter%2==0:
-        if debug:
-            print("Black played",move)
-            print("stockfish recommend:",BlackNextBestMove.move)
-        if str(move) in str(BlackNextBestMove):
-            BlackPoints = BlackPoints+1
-        BlackMoves = BlackMoves+1
-        WhiteNextBestMove = engine.play(board, chess.engine.Limit(depth=depth))
-    # White is playing
-    else:
-        if debug:
-            print("White played",move)
-            print("stockfish recommend:",WhiteNextBestMove.move)
-        if str(move) in str(WhiteNextBestMove):
-            WhitePoints = WhitePoints+1
-        WhiteMoves = WhiteMoves+1
-        BlackNextBestMove = engine.play(board, chess.engine.Limit(depth=depth))
-    
-    counter=counter+1
+        counter=counter+1
 
-print("Game Informations")
-print("-----------------")
-print("Event:",first_game.headers["Event"])
-print("White:",first_game.headers["White"])
-print("Black:",first_game.headers["Black"])
-print("Date:",first_game.headers["Date"])
-print("Whitepoints=",WhitePoints)
-print("Blackpoints=",BlackPoints)
-print("Statistics of the game:")
-print("Stockfish depth: ",depth)
-print("White:",round((WhitePoints/WhiteMoves)*100,2),"%")
-print("Black:",round((BlackPoints/BlackMoves)*100,2),"%")
+    print("Game Informations")
+    print("-----------------")
+    print("Event:",games.headers["Event"])
+    print("White:",games.headers["White"])
+    print("Black:",games.headers["Black"])
+    print("Date:",games.headers["Date"])
+    print("Whitepoints=",WhitePoints)
+    print("Blackpoints=",BlackPoints)
+    print("Statistics of the game:")
+    print("Stockfish depth: ",depth)
+    print("White:",round((WhitePoints/WhiteMoves)*100,2),"%")
+    print("Black:",round((BlackPoints/BlackMoves)*100,2),"%")
 
 engine.quit()
 
