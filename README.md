@@ -54,5 +54,5 @@ RoadMap
 
 - New option for calculation based on the 3 best moves (multipv)
 - Use of a muli game pgn file (right now one game per file is supported) ... DONE ✅
-- Export results to json/csv format for bigdata processing
-- More details in the result (game result, elo of players)
+- Export results to json/csv format for bigdata processing ... DONE ✅
+- More details in the result (game result, elo of players) ... DONE ✅
